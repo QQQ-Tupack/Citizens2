@@ -518,10 +518,14 @@ public class ShopTrait extends Trait {
                     e.printStackTrace();
                 }
             }
-            ItemStack stack = display.clone();
+                        ItemStack stack = display.clone();
             ItemMeta meta = stack.getItemMeta();
             if (meta.hasDisplayName()) {
-                meta.setDisplayName(placeholders(meta.getDisplayName(), player));
+                String name = meta.getDisplayName();
+                String replaced = placeholders(name, player);
+                if (!replaced.equals(name)) {
+                    meta.setDisplayName(replaced);
+                }
             }
             if (Setting.SHOP_USE_DEFAULT_DESCRIPTION.asBoolean() && !meta.hasLore()) {
                 List<String> lore = new ArrayList<>();
@@ -531,14 +535,20 @@ public class ShopTrait extends Trait {
                         lore.add(r.describe());
                     }
                 });
-
                 if (timesPurchasable > 0) {
                     lore.add("Times purchasable: " + timesPurchasable);
                 }
                 meta.setLore(lore);
             }
             if (meta.hasLore()) {
-                meta.setLore(Lists.transform(meta.getLore(), line -> placeholders(line, player)));
+                List<String> original = meta.getLore();
+                List<String> replaced = new ArrayList<>();
+                for (String line : original) {
+                    replaced.add(placeholders(line, player));
+                }
+                if (!replaced.equals(original)) {
+                    meta.setLore(replaced);
+                }
             }
             stack.setItemMeta(meta);
             return stack;
